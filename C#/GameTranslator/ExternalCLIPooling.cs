@@ -54,31 +54,31 @@ namespace GameTranslator
         public string Execute(string input)
         {
             Process process = null;
-            Plugin.Log.LogInfo("TEST1");
+
             try
             {
-                Plugin.Log.LogInfo("TEST2");
+
                 // Get or create a process
                 if (!_availableProcesses.TryTake(out process))
                 {
                     process = CreateProcess();
                 }
-                Plugin.Log.LogInfo("TEST3");
+
 
                 // Send input to process
                 process.StandardInput.WriteLine(input);
                 process.StandardInput.Flush();
-                Plugin.Log.LogInfo("TEST4");
+
                 // Read output
                 string result = process.StandardOutput.ReadLine();
-                Plugin.Log.LogInfo("TEST5");
+
                 // Check for errors
                 //string error = process.StandardError.ReadLine();
                 //if (!string.IsNullOrEmpty(error))
                 //{
                 //    Plugin.Log.LogError($"CLI execution error: {error}");
                 //}
-                Plugin.Log.LogInfo("TEST6");
+
                 return result;
             }
             finally
