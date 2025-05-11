@@ -7,7 +7,7 @@ using System.IO;
 namespace GameTranslator
 {
 
-    public static class ExternalCliExecutor
+    public static class ExternalCLIExecutor
     {
         public static string ExecuteTranslation(string lang, string text)
         {

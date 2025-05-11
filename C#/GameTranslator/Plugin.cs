@@ -25,6 +25,8 @@ namespace GameTranslator
         public static bool SpeechBubble = false;
 
         public static ConfigEntry<string> TargetLanguage;
+
+        public static CliProcessPool process = null;
         private void Awake()
         {
             Plugin.Log = base.Logger;
@@ -36,8 +38,18 @@ namespace GameTranslator
                 "Target Language",
                 "Lithuanian",
                 new ConfigDescription("Target language to translate in", new AcceptableValueList<string>("Lithuanian", "Latvian")));
-        }
 
+            process = new CliProcessPool(Path.Combine(Plugin.PluginPath, "TerminalApp.exe"), 1);
+            //string result = process.Execute("StartupTest");
+            //Log.LogInfo($"Translator status {result}");
+        }
+        public static string TranslateText(string lang, string text)
+        {
+           
+
+            string result = process.Execute($"{lang}|{text}");
+            return result;
+        }
         private void OnEnable()
         {
             Harmony.PatchAll();
@@ -75,8 +87,8 @@ namespace GameTranslator
             {
                 if (SpeechBubble == false && NEGAFEHECNL.ABMMBFGLBOL.activeSelf == true)        //if the speech bubble appears
                 {
-                    line1 = ExternalCliExecutor.ExecuteTranslation("LT", NEGAFEHECNL.MLLPFEKAONO[1]);
-                    line2 = ExternalCliExecutor.ExecuteTranslation("LT", NEGAFEHECNL.MLLPFEKAONO[2]);
+                    line1 = TranslateText("LT", NEGAFEHECNL.MLLPFEKAONO[1]);
+                    line2 = TranslateText("LT", NEGAFEHECNL.MLLPFEKAONO[2]);
                     Log.LogInfo($"{NEGAFEHECNL.MLLPFEKAONO[1]}|{NEGAFEHECNL.MLLPFEKAONO[2]}");
                 }
                 if (line1 != "")
