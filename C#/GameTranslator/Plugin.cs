@@ -49,6 +49,8 @@ namespace GameTranslator
             Harmony.UnpatchSelf();
             Logger.LogInfo($"Unloaded {PluginName}!");
         }
+        static string line1 = "";
+        static string line2 = "";
         [HarmonyPatch(typeof(NEGAFEHECNL), nameof(NEGAFEHECNL.BBICLKGGIGB))]
         [HarmonyPrefix]         //Used to track when the speech bubble appears
         static void SpeakLinesPre()
@@ -57,24 +59,71 @@ namespace GameTranslator
             {
                 SpeechBubble = NEGAFEHECNL.ABMMBFGLBOL.activeSelf;
             }
+            else
+            {
+                line1 = "";
+                line2 = "";
+            }
         }
+
         [HarmonyPatch(typeof(NEGAFEHECNL), nameof(NEGAFEHECNL.BBICLKGGIGB))]
-        [HarmonyPostfix]        //handling 
+        [HarmonyPostfix]        //handling dialog
+        // note: runs on update
         static void SpeakLinesPost()
         {
             if (NEGAFEHECNL.ABMMBFGLBOL != null && NEGAFEHECNL.EJFHLGMHAHB == 0)
             {
                 if (SpeechBubble == false && NEGAFEHECNL.ABMMBFGLBOL.activeSelf == true)        //if the speech bubble appears
                 {
+                    line1 = ExternalCliExecutor.ExecuteTranslation("LT", NEGAFEHECNL.MLLPFEKAONO[1]);
+                    line2 = ExternalCliExecutor.ExecuteTranslation("LT", NEGAFEHECNL.MLLPFEKAONO[2]);
                     Log.LogInfo($"{NEGAFEHECNL.MLLPFEKAONO[1]}|{NEGAFEHECNL.MLLPFEKAONO[2]}");
                 }
-                NEGAFEHECNL.BMNIHDAGPFB[1].text = "Čia yra mano replacintas tekstas";
-               // NEGAFEHECNL.BMNIHDAGPFB[1].color = NEGAFEHECNL.OBFDKFIDMIL[1];
-                NEGAFEHECNL.BMNIHDAGPFB[2].text = "Originalus tekstas yra konsolėje";
-                //  NEGAFEHECNL.BMNIHDAGPFB[2].color = NEGAFEHECNL.OBFDKFIDMIL[2];
-                LIPNHOMGGHF.JPFJOHGHHDL(NEGAFEHECNL.BMNIHDAGPFB[1], 40, 45);  //resizing the text
-                LIPNHOMGGHF.JPFJOHGHHDL(NEGAFEHECNL.BMNIHDAGPFB[2], 40, 45);
+                if (line1 != "")
+                {
+                    NEGAFEHECNL.BMNIHDAGPFB[1].text = line1;
+                    LIPNHOMGGHF.JPFJOHGHHDL(NEGAFEHECNL.BMNIHDAGPFB[1], 40, 45);  //resizing the text
+                }
+                if (line2 != "")
+                {
+                    NEGAFEHECNL.BMNIHDAGPFB[2].text = line2;
+                    LIPNHOMGGHF.JPFJOHGHHDL(NEGAFEHECNL.BMNIHDAGPFB[2], 40, 45);  //resizing the text
+                }
             }
+        }
+
+        [HarmonyPatch(typeof(Scene_News), nameof(Scene_News.KALIJLMGNNH))]
+        [HarmonyPostfix]        //news pages 
+        static void NewsPageDisplay(Scene_News __instance, int EJDHFNIJFHI)
+        {
+            string headline = "";
+            if (__instance.gHeadline.activeSelf)    //week report
+            {
+                headline = IMNHOCBFGHJ.OLMOLOOOIJM[IMNHOCBFGHJ.ODOAPLMOJPD].PKLAJJAGGAK;  
+                __instance.textHeadline.text = "Čia yra mano replacintas tekstas";
+            }
+            string text = IMNHOCBFGHJ.OLMOLOOOIJM[IMNHOCBFGHJ.ODOAPLMOJPD].CLCLFBAAMOM; //match report; week report
+            __instance.textArticle.text = "Originalus tekstas yra konsolėje";
+
+            Log.LogInfo($"{headline}|{text}");
+        }
+
+
+
+        [HarmonyPatch(typeof(IMNHOCBFGHJ), nameof(IMNHOCBFGHJ.OAODMFBHCGA))]
+        [HarmonyPostfix]        //match news page headline 1
+        static void MatchReportHeadline(ref string __result)
+        {
+            Log.LogInfo($"1: {__result}");
+            __result = "Čia yra mano replacintas tekstas 1";
+        }
+
+        [HarmonyPatch(typeof(IMNHOCBFGHJ), nameof(IMNHOCBFGHJ.CIIDDMMENME))]
+        [HarmonyPostfix]        //match news page headline 2
+        static void MatchReportResult(ref string __result)
+        {
+            Log.LogInfo($"2: {__result}");
+            __result = "Čia yra mano replacintas tekstas 2";
         }
     }
 }
