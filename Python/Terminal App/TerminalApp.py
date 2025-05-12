@@ -22,7 +22,7 @@ def process_single_input(input_line):
     # sys.stderr.flush()
 
 def translate_text(lang, text):
-    # Your translation logic here
+    # TODO: model.Translate(text)
     return f"Translated '{text}' to {lang}"
 
 def main():
