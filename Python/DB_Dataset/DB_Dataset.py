@@ -3,9 +3,9 @@ from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 import pandas as pd
 import os
-import config
+from config import db_string
 
-engine = create_engine(config.db_string)
+engine = create_engine(db_string)
 class Base(DeclarativeBase):
     pass 
 
@@ -23,12 +23,12 @@ def FillDatabaseTable(session_maker, table : str, file_en : str, file_lt : str):
         l_lt = f_lt.readline().strip()
         print(l_en)
         print(l_lt)
-        while (l_en != "" or l_lt != ""):
-            a = Dataset_QED_Entry(en = l_en, lt= l_lt)
-            session.add(a)
-            session.commit()
-            l_en = f_en.readline().strip()
-            l_lt = f_lt.readline().strip()
+        # while (l_en != "" or l_lt != ""):
+        #     a = Dataset_QED_Entry(en = l_en, lt= l_lt)
+        #     session.add(a)
+        #     session.commit()
+        #     l_en = f_en.readline().strip()
+        #     l_lt = f_lt.readline().strip()
             
         # darbuotojas = Darbuotojas(vardas=vardas, pavarde=pavarde, gimimo_data=gimimo_data, pareigos=pareigos, atlyginimas=atlyginimas)
         # session.add(darbuotojas)
