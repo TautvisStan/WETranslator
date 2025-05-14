@@ -26,7 +26,7 @@ namespace GameTranslator
 
         public static ConfigEntry<string> TargetLanguage;
 
-        public static CliProcessPool process = null;
+        public static CLIProcess TranslatorProcess = null;
         private void Awake()
         {
             Plugin.Log = base.Logger;
@@ -39,15 +39,11 @@ namespace GameTranslator
                 "Lithuanian",
                 new ConfigDescription("Target language to translate in", new AcceptableValueList<string>("Lithuanian", "Latvian")));
 
-            process = new CliProcessPool(Path.Combine(Plugin.PluginPath, "TerminalApp.exe"), 1);
-            //string result = process.Execute("StartupTest");
-            //Log.LogInfo($"Translator status {result}");
+            TranslatorProcess = new CLIProcess(Path.Combine(Plugin.PluginPath, "TerminalApp.exe"));
         }
         public static string TranslateText(string lang, string text)
         {
-           
-
-            string result = process.Execute($"{lang}|{text}");
+            string result = TranslatorProcess.Execute($"{lang}|{text}");
             return result;
         }
         private void OnEnable()
@@ -89,7 +85,6 @@ namespace GameTranslator
                 {
                     line1 = TranslateText("LT", NEGAFEHECNL.MLLPFEKAONO[1]);
                     line2 = TranslateText("LT", NEGAFEHECNL.MLLPFEKAONO[2]);
-                    Log.LogInfo($"{NEGAFEHECNL.MLLPFEKAONO[1]}|{NEGAFEHECNL.MLLPFEKAONO[2]}");
                 }
                 if (line1 != "")
                 {
@@ -108,34 +103,29 @@ namespace GameTranslator
         [HarmonyPostfix]        //news pages 
         static void NewsPageDisplay(Scene_News __instance, int EJDHFNIJFHI)
         {
-            string headline = "";
             if (__instance.gHeadline.activeSelf)    //week report
             {
-                headline = IMNHOCBFGHJ.OLMOLOOOIJM[IMNHOCBFGHJ.ODOAPLMOJPD].PKLAJJAGGAK;  
-                __instance.textHeadline.text = "Čia yra mano replacintas tekstas";
+                //   headline = IMNHOCBFGHJ.OLMOLOOOIJM[IMNHOCBFGHJ.ODOAPLMOJPD].PKLAJJAGGAK;
+                string headline = TranslateText("LT", IMNHOCBFGHJ.OLMOLOOOIJM[IMNHOCBFGHJ.ODOAPLMOJPD].PKLAJJAGGAK);
+                __instance.textHeadline.text = headline;
             }
-            string text = IMNHOCBFGHJ.OLMOLOOOIJM[IMNHOCBFGHJ.ODOAPLMOJPD].CLCLFBAAMOM; //match report; week report
-            __instance.textArticle.text = "Originalus tekstas yra konsolėje";
-
-            Log.LogInfo($"{headline}|{text}");
+            //string text = IMNHOCBFGHJ.OLMOLOOOIJM[IMNHOCBFGHJ.ODOAPLMOJPD].CLCLFBAAMOM; //match report; week report
+            string text = TranslateText("LT", IMNHOCBFGHJ.OLMOLOOOIJM[IMNHOCBFGHJ.ODOAPLMOJPD].CLCLFBAAMOM);
+            __instance.textArticle.text = text;
         }
-
-
 
         [HarmonyPatch(typeof(IMNHOCBFGHJ), nameof(IMNHOCBFGHJ.OAODMFBHCGA))]
         [HarmonyPostfix]        //match news page headline 1
         static void MatchReportHeadline(ref string __result)
         {
-            Log.LogInfo($"1: {__result}");
-            __result = "Čia yra mano replacintas tekstas 1";
+            __result = TranslateText("LT", __result);
         }
 
         [HarmonyPatch(typeof(IMNHOCBFGHJ), nameof(IMNHOCBFGHJ.CIIDDMMENME))]
         [HarmonyPostfix]        //match news page headline 2
         static void MatchReportResult(ref string __result)
         {
-            Log.LogInfo($"2: {__result}");
-            __result = "Čia yra mano replacintas tekstas 2";
+            __result = TranslateText("LT", __result);
         }
     }
 }
