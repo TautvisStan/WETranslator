@@ -15,7 +15,7 @@ namespace GameTranslator
     {
         public const string PluginGuid = "GeeEm.WrestlingEmpire.GameTranslator";
         public const string PluginName = "GameTranslator";
-        public const string PluginVer = "0.0.2";
+        public const string PluginVer = "0.0.3";
 
         internal static ManualLogSource Log;
         internal readonly static Harmony Harmony = new(PluginGuid);
@@ -24,7 +24,7 @@ namespace GameTranslator
 
         public static bool SpeechBubble = false;
 
-        public static ConfigEntry<string> TargetLanguage;
+        public static ConfigEntry<string> Model;
 
         public static CLIProcess TranslatorProcess = null;
         private void Awake()
@@ -33,11 +33,11 @@ namespace GameTranslator
 
             PluginPath = Path.GetDirectoryName(Info.Location);
 
-            TargetLanguage = Config.Bind(
+            Model = Config.Bind(
                 "General",
-                "Target Language",
-                "Lithuanian",
-                new ConfigDescription("Target language to translate in", new AcceptableValueList<string>("Lithuanian", "Spanish")));
+                "Model",
+                "LT",
+                new ConfigDescription("Translation model to use", new AcceptableValueList<string>("LT", "ES")));
 
             TranslatorProcess = new CLIProcess(Path.Combine(Plugin.PluginPath, "TranslatorApp.exe"));
             Log.LogWarning(TranslateText("LT", "Hello Code Academy!"));
@@ -86,8 +86,8 @@ namespace GameTranslator
             {
                 if (SpeechBubble == false && NEGAFEHECNL.ABMMBFGLBOL.activeSelf == true)        //if the speech bubble appears
                 {
-                    line1 = TranslateText("LT", NEGAFEHECNL.MLLPFEKAONO[1]);
-                    line2 = TranslateText("LT", NEGAFEHECNL.MLLPFEKAONO[2]);
+                    line1 = TranslateText(Model.Value, NEGAFEHECNL.MLLPFEKAONO[1]);
+                    line2 = TranslateText(Model.Value, NEGAFEHECNL.MLLPFEKAONO[2]);
                 }
                 if (line1 != "")
                 {
@@ -109,11 +109,11 @@ namespace GameTranslator
             if (__instance.gHeadline.activeSelf)    //week report
             {
                 //   headline = IMNHOCBFGHJ.OLMOLOOOIJM[IMNHOCBFGHJ.ODOAPLMOJPD].PKLAJJAGGAK;
-                string headline = TranslateText("LT", IMNHOCBFGHJ.OLMOLOOOIJM[IMNHOCBFGHJ.ODOAPLMOJPD].PKLAJJAGGAK);
+                string headline = TranslateText(Model.Value, IMNHOCBFGHJ.OLMOLOOOIJM[IMNHOCBFGHJ.ODOAPLMOJPD].PKLAJJAGGAK);
                 __instance.textHeadline.text = headline;
             }
             //string text = IMNHOCBFGHJ.OLMOLOOOIJM[IMNHOCBFGHJ.ODOAPLMOJPD].CLCLFBAAMOM; //match report; week report
-            string text = TranslateText("LT", IMNHOCBFGHJ.OLMOLOOOIJM[IMNHOCBFGHJ.ODOAPLMOJPD].CLCLFBAAMOM);
+            string text = TranslateText(Model.Value, IMNHOCBFGHJ.OLMOLOOOIJM[IMNHOCBFGHJ.ODOAPLMOJPD].CLCLFBAAMOM);
             __instance.textArticle.text = text;
         }
 
@@ -121,14 +121,14 @@ namespace GameTranslator
         [HarmonyPostfix]        //match news page headline 1
         static void MatchReportHeadline(ref string __result)
         {
-            __result = TranslateText("LT", __result);
+            __result = TranslateText(Model.Value, __result);
         }
 
         [HarmonyPatch(typeof(IMNHOCBFGHJ), nameof(IMNHOCBFGHJ.CIIDDMMENME))]
         [HarmonyPostfix]        //match news page headline 2
         static void MatchReportResult(ref string __result)
         {
-            __result = TranslateText("LT", __result);
+            __result = TranslateText(Model.Value, __result);
         }
     }
 }
