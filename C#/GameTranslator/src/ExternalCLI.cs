@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using UnityEngine.UIElements;
 
 namespace GameTranslator
 {
@@ -31,11 +25,24 @@ namespace GameTranslator
                     RedirectStandardInput = true,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
-                    CreateNoWindow = true
+                    CreateNoWindow = true,
+                    StandardOutputEncoding = System.Text.Encoding.UTF8,
+                    StandardErrorEncoding = System.Text.Encoding.UTF8,
+                    StandardInputEncoding = System.Text.Encoding.UTF8,
+                    Environment = { {"PYTHONIOENCODING", "utf-8"} }
                 },
                 EnableRaisingEvents = true
             };
+            process.ErrorDataReceived += (sender, e) => {
+
+                if (!string.IsNullOrEmpty(e.Data))
+
+                    Plugin.Log.LogError($"Translator error: {e.Data}");
+
+            };
             process.Start();
+            process.BeginErrorReadLine();
+           // string initialOutput = process.StandardOutput.ReadLine();
             return process;
         }
 
@@ -43,8 +50,12 @@ namespace GameTranslator
         {
             try
             {
-                if (_process == null)
+                if (_process == null || _process.HasExited)
                 {
+                    if (_process.HasExited)
+                    {
+                        Plugin.Log.LogError("Translator ded");
+                    }
                     _process = CreateProcess();
                 }
                 _process.StandardInput.WriteLine(input);
