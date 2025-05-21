@@ -15,7 +15,7 @@ namespace GameTranslator
     {
         public const string PluginGuid = "GeeEm.WrestlingEmpire.GameTranslator";
         public const string PluginName = "GameTranslator";
-        public const string PluginVer = "0.0.1";
+        public const string PluginVer = "0.0.2";
 
         internal static ManualLogSource Log;
         internal readonly static Harmony Harmony = new(PluginGuid);
@@ -37,13 +37,16 @@ namespace GameTranslator
                 "General",
                 "Target Language",
                 "Lithuanian",
-                new ConfigDescription("Target language to translate in", new AcceptableValueList<string>("Lithuanian", "Latvian")));
+                new ConfigDescription("Target language to translate in", new AcceptableValueList<string>("Lithuanian", "Spanish")));
 
-            TranslatorProcess = new CLIProcess(Path.Combine(Plugin.PluginPath, "TerminalApp.exe"));
+            TranslatorProcess = new CLIProcess(Path.Combine(Plugin.PluginPath, "TranslatorApp.exe"));
+            Log.LogWarning(TranslateText("LT", "Hello Code Academy!"));
         }
         public static string TranslateText(string lang, string text)
         {
+            Log.LogInfo($"Translating {text} to {lang}");
             string result = TranslatorProcess.Execute($"{lang}|{text}");
+            Log.LogInfo($"Received {result}");
             return result;
         }
         private void OnEnable()
