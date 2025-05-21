@@ -15,24 +15,21 @@ class Dataset_QED_Entry(Base):
     en = Column(String(255))
     lt = Column(String(255))
 
-def FillDatabaseTable(session_maker, table : str, file_en : str, file_lt : str):
+def FillDatabaseTable(session_maker, file_en : str, file_lt : str):
     with session_maker() as session: 
         f_en = open(file_en, encoding="utf-8")
         f_lt = open(file_lt, encoding="utf-8")
         l_en = f_en.readline().strip()
         l_lt = f_lt.readline().strip()
-        print(l_en)
-        print(l_lt)
-        # while (l_en != "" or l_lt != ""):
-        #     a = Dataset_QED_Entry(en = l_en, lt= l_lt)
-        #     session.add(a)
-        #     session.commit()
-        #     l_en = f_en.readline().strip()
-        #     l_lt = f_lt.readline().strip()
+        # print(l_en)
+        # print(l_lt)
+        while (l_en != "" or l_lt != ""):
+            a = Dataset_QED_Entry(en = l_en, lt= l_lt)
+            session.add(a)
+            session.commit()
+            l_en = f_en.readline().strip()
+            l_lt = f_lt.readline().strip()
             
-        # darbuotojas = Darbuotojas(vardas=vardas, pavarde=pavarde, gimimo_data=gimimo_data, pareigos=pareigos, atlyginimas=atlyginimas)
-        # session.add(darbuotojas)
-        # session.commit()
         f_en.close()
         f_lt.close()
 
@@ -40,5 +37,5 @@ def FillDatabaseTable(session_maker, table : str, file_en : str, file_lt : str):
 Base.metadata.create_all(engine)
  
 session_maker = sessionmaker(engine)
-print(os.getcwd())
-FillDatabaseTable(session_maker, "asd", "./DB_Dataset/datasets/QED.en-lt.en", "./DB_Dataset/datasets/QED.en-lt.lt")
+if __name__ == "__main__":
+    FillDatabaseTable(session_maker, "./DB_Dataset/datasets/QED.en-lt.en", "./DB_Dataset/datasets/QED.en-lt.lt")

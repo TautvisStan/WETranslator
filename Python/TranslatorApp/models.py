@@ -2,10 +2,8 @@
 # import keras_hub
 # from keras import ops
 
-import json
 import tensorflow as tf
 from keras.models import load_model
-import pickle
 from keras_layers import TransformerDecoder, TransformerEncoder, PositionalEmbedding
 from keras import ops
 import numpy as np
@@ -23,39 +21,37 @@ def custom_standardization(input_string):
     return tf_strings.regex_replace(lowercase, "[%s]" % re.escape(strip_chars), "")
 
 class ModelKeras():
-    def __init__(self, src_vec, tgt_vec, model):
+    def __init__(self, src_vec, src_vocab, tgt_vec, tgt_vocab, model, max_length):
 
-
-# Load the trained model
         self.transformer = load_model(model, custom_objects={
             "TransformerEncoder": TransformerEncoder,
             "TransformerDecoder": TransformerDecoder,
             "PositionalEmbedding": PositionalEmbedding
         })
 
-        # Load the English vectorizer
-        self.loaded_eng_config = np.load('eng_vectorization_config.npy', allow_pickle=True).item()
-        self.loaded_eng_vocab = np.load('eng_vocab.npy', allow_pickle=True)
-        self.loaded_eng_vectorization = TextVectorization(**self.loaded_eng_config)
-        self.loaded_eng_vectorization.set_vocabulary(self.loaded_eng_vocab)
+        # Load the source vectorizer
+        self.loaded_src_config = np.load(src_vec, allow_pickle=True).item()
+        self.loaded_src_vocab = np.load(src_vocab, allow_pickle=True)
+        self.loaded_src_vectorization = TextVectorization(**self.loaded_src_config)
+        self.loaded_src_vectorization.set_vocabulary(self.loaded_src_vocab)
 
-        # Load the Spanish vectorizer
-        self.loaded_spa_config = np.load('spa_vectorization_config.npy', allow_pickle=True).item()
-        self.loaded_spa_vocab = np.load('spa_vocab.npy', allow_pickle=True)
-        self.loaded_spa_vectorization = TextVectorization(**self.loaded_spa_config)
-        self.loaded_spa_vectorization.set_vocabulary(self.loaded_spa_vocab)
+        # Load the target vectorizer
+        self.loaded_tgt_config = np.load(tgt_vec, allow_pickle=True).item()
+        self.loaded_tgt_vocab = np.load(tgt_vocab, allow_pickle=True)
+        self.loaded_tgt_vectorization = TextVectorization(**self.loaded_tgt_config)
+        self.loaded_tgt_vectorization.set_vocabulary(self.loaded_tgt_vocab)
 
 
-        self.spa_vocab = self.loaded_spa_vectorization.get_vocabulary()
-        self.spa_index_lookup = dict(zip(range(len(self.spa_vocab)), self.spa_vocab))
-        self.max_decoded_sentence_length = 20
+        # self.tgt_vocab = self.loaded_tgt_vectorization.get_vocabulary()
+        self.tgt_index_lookup = dict(zip(range(len(self.loaded_tgt_vocab)), self.loaded_tgt_vocab))
+        self.max_decoded_sentence_length = max_length
 
 
     def translate(self, input_sentence):
-        tokenized_input_sentence = self.loaded_eng_vectorization([input_sentence])
+        tokenized_input_sentence = self.loaded_src_vectorization([input_sentence])
         decoded_sentence = "[start]"
         for i in range(self.max_decoded_sentence_length):
-            tokenized_target_sentence = self.loaded_spa_vectorization([decoded_sentence])[:, :-1]
+            tokenized_target_sentence = self.loaded_tgt_vectorization([decoded_sentence])[:, :-1]
             predictions = self.transformer(
                 {
                     "encoder_inputs": tokenized_input_sentence,
@@ -63,16 +59,19 @@ class ModelKeras():
                 }
             )
 
-            # ops.argmax(predictions[0, i, :]) is not a concrete value for jax here
             sampled_token_index = ops.convert_to_numpy(
                 ops.argmax(predictions[0, i, :])
             ).item(0)
-            sampled_token = self.spa_index_lookup[sampled_token_index]
+            sampled_token = self.tgt_index_lookup[sampled_token_index]
             decoded_sentence += " " + sampled_token
 
             if sampled_token == "[end]":
                 break
+        decoded_sentence = decoded_sentence.replace("[PAD]", "").replace("[start]", "").replace("[end]", "").strip()
         return decoded_sentence
+    
+
+    
 # NEVEIKIA NES "ImportError: WordPieceTokenizer requires `tensorflow` and `tensorflow-text` for text processing. 
 # Run `pip install tensorflow-text` to install both packages or visit https://www.tensorflow.org/install"
 # BET ! ! ! ! !
